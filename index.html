@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Анкеты</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>Анкеты</h1>
+        <div id="userList"></div>
+        
+        <script>
+            // Function to fetch user data from API
+            async function fetchUsers() {
+                try {
+                    const response = await fetch('http://localhost:8080/api/all-users-list');
+                    const responseData = await response.json(); 
+                    const users = responseData.data; 
+                    if (!Array.isArray(users)) {
+                        throw new Error('Data is not an array');
+                    }
+                    
+                    return users;
+                } catch (error) {
+                    console.log('Error fetching user data:', error);
+                    return [];
+                }
+            }
+        
+            // Function to generate HTML for each user
+            function generateUserHTML(user) {
+                return `
+                    <div class="user-form">
+                        <label class="username-label">ФИО: ${user.surname} ${user.firstname} </label>
+                        <div class="actions">
+                            <button type="button" class="checkbox-btn" onclick="confirmUser('${user.id}')">✓</button>
+                            <button type="button" class="cancel-btn" onclick="cancelUser('${user.id}')">✖️</button>
+                        </div>
+                    </div>
+                `;
+            }
+        
+            // Function to display users
+            async function displayUsers() {
+                const userListContainer = document.getElementById('userList');
+                const users = await fetchUsers();
+                
+                userListContainer.innerHTML = '';
+                
+                users.forEach(user => {
+                    const userHTML = generateUserHTML(user);
+                    userListContainer.innerHTML += userHTML;
+                });
+            }
+        
+            // Function to cofirm button
+            function confirmUser(userId) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Хотите подтвердить оплату?',
+                    showCancelButton: true,
+                    confirmButtonText: 'Да, продолжить',
+                    cancelButtonText: 'Нет, спасибо', 
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        updateUserPayMark(userId)
+                    } else {
+                        console.log("Soo there is cancel")
+                    }
+                });
+            }
+
+             // Function to cancel button
+             function cancelUser(userId) {
+
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Хотите отменить оплату?',
+                    showCancelButton: true,
+                    confirmButtonText: 'Да, продолжить',
+                    cancelButtonText: 'Нет, спасибо', 
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        cancelPayment(userId)
+                    } else {
+                        console.log("Soo there is cancel")
+                    }
+                });
+            }
+
+            function cancelPayment(userId) {
+                 // Constructing data object
+                 const bodyData = {
+                    cvv: 'Hello'
+                };
+
+                // Sending PUT request using fetch
+                fetch(`http://localhost:8080/api/cancel-payment/${userId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(bodyData),
+                })
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Success:', data);
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Вы успешно отменили оплату',
+                        showCancelButton: true,
+                        showCancelButton: false,
+                        confirmButtonText: 'Подтвердить',
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            console.error('Success:', data);
+                        }
+                    });
+                    
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    // Optionally, show error message or handle errors
+                })
+            }
+
+            function updateUserPayMark(userId) {
+                // Constructing data object
+                const bodyData = {
+                    cvv: 'Hello'
+                };
+
+                // Sending PUT request using fetch
+                fetch(`http://localhost:8080/api/confirm-payment/${userId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(bodyData),
+                })
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Success:', data);
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Вы успешно подтвердили оплату',
+                        showCancelButton: true,
+                        showCancelButton: false,
+                        confirmButtonText: 'Подтвердить',
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            console.error('Success:', data);
+                        }
+                    });
+                    
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    // Optionally, show error message or handle errors
+                })
+            }
+        
+            // Display users when the page loads
+            displayUsers();
+        </script>
+    </div>
+</body>
+</html>
