@@ -16,7 +16,7 @@
             // Function to fetch user data from API
             async function fetchUsers() {
                 try {
-                    const response = await fetch('http://localhost:8080/api/all-users-list');
+                    const response = await fetch('http://78.40.108.115:8080/api/all-users-list');
                     const responseData = await response.json(); 
                     const users = responseData.data; 
                     if (!Array.isArray(users)) {
@@ -98,7 +98,7 @@
                 };
 
                 // Sending PUT request using fetch
-                fetch(`http://localhost:8080/api/cancel-payment/${userId}`, {
+                fetch(`http://78.40.108.115:8080/api/cancel-payment/${userId}`, {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',
@@ -134,7 +134,7 @@
                 };
 
                 // Sending PUT request using fetch
-                fetch(`http://localhost:8080/api/confirm-payment/${userId}`, {
+                fetch(`http://78.40.108.115:8080/api/confirm-payment/${userId}`, {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',
